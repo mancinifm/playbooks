@@ -1,0 +1,31 @@
+---
+  - name: "Install Calibre"
+    hosts: localhost
+    become: yes
+    connection: local 
+    tasks:
+
+    - name: Install libdeflate calibre prerequisite
+      yum:
+        name: libdeflate
+        state: latest
+
+    - name: Download calibre installer
+      ansible.builtin.get_url:
+        url: https://download.calibre-ebook.com/linux-installer.sh 
+        dest: /tmp/linux-installer.sh
+        mode: u+x 
+
+    - name: Excecute calibre installer
+      ansible.builtin.shell: /tmp/linux-installer.sh >> /tmp/linux-installer.log
+
+    - name: Remove calibre installer
+      ansible.builtin.file:
+        path: /tmp/linux-installer.sh
+        state: absent
+
+    - name: Create cron for backup script
+      ansible.builtin.cron:
+        name: "a job for reboot"
+        special_time: reboot
+        job: "cp /home/adam/Calibre\ Library/metadata* /media/smb/data/calibre/"
